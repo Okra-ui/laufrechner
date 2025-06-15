@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laufrechner</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#007BFF" />
+  <link rel="icon" href="icon.png" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js');
+      });
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h2 {
+      color: #333;
+    }
+    .section {
+      background: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>Laufrechner</h2>
+
+  <div class="section">
+    <h3>a) Pace berechnen (min/km)</h3>
+    <label>Distanz (km): <input id="paceDist" type="number" step="0.01" /></label>
+    <label>Zeit (hh:mm:ss): <input id="paceTime" type="text" placeholder="z.B. 0:45:00" /></label>
+    <button onclick="berechnePace()">Berechnen</button>
+    <div class="result" id="paceResult"></div>
+  </div>
+
+  <div class="section">
+    <h3>b) Distanz berechnen (km)</h3>
+    <label>Pace (min/km): <input id="distPace" type="text" placeholder="z.B. 5:00" /></label>
+    <label>Zeit (hh:mm:ss): <input id="distTime" type="text" placeholder="z.B. 1:00:00" /></label>
+    <button onclick="berechneDistanz()">Berechnen</button>
+    <div class="result" id="distResult"></div>
+  </div>
+
+  <div class="section">
+    <h3>c) Zeit berechnen</h3>
+    <label>Distanz (km): <input id="timeDist" type="number" step="0.01" /></label>
+    <label>Pace (min/km): <input id="timePace" type="text" placeholder="z.B. 6:00" /></label>
+    <button onclick="berechneZeit()">Berechnen</button>
+    <div class="result" id="timeResult"></div>
+  </div>
+
+  <script>
+    function parseTimeToSeconds(str) {
+      const parts = str.split(":").map(Number);
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      return parseFloat(str) * 60;
+    }
+
+    function secondsToMinPerKm(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.round(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function secondsToTimeFormat(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = Math.round(seconds % 60);
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function berechnePace() {
+      const dist = parseFloat(document.getElementById('paceDist').value);
+      const time = parseTimeToSeconds(document.getElementById('paceTime').value);
+      document.getElementById('paceResult').innerText =
+        dist > 0 && time > 0 ? `Pace: ${secondsToMinPerKm(time / dist)} min/km` : 'Bitte gültige Werte eingeben.';
+    }
+
+    function berechneDistanz() {
+      const pace = parseTimeToSeconds(document.getElementById('distPace').value);
+      const time = parseTimeToSeconds(document.getElementById('distTime').value);
+      document.getElementById('distResult').innerText =
+        pace > 0 && time > 0 ? `Distanz: ${(time / pace).toFixed(2)} km` : 'Bitte gültige Werte eingeben.';
+    }
+
+    function berechneZeit() {
+      const dist = parseFloat(document.getElementById('timeDist').value);
+      const pace = parseTimeToSeconds(document.getElementById('timePace').value);
+      document.getElementById('timeResult').innerText =
+        dist > 0 && pace > 0 ? `Zeit: ${secondsToTimeFormat(dist * pace)}` : 'Bitte gültige Werte eingeben.';
+    }
+  </script>
+</body>
+</html>
